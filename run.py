@@ -62,8 +62,8 @@ def main(argv):
         images = ImageInstanceCollection().fetch_with_filter("project", cj.parameters.cytomine_id_project)
         images = [image for image in images if image.id in image_ids]
 
-        use_global_threshold = True  # TODO
         tile_size = cj.parameters.tile_size
+        tile_overlap = cj.parameters.tile_overlap
         filter_func = _get_filter(cj.parameters.filter)
         projection = cj.parameters.projection
         if projection not in ('min', 'max', 'average'):
@@ -80,7 +80,7 @@ def main(argv):
             cj.log("Get tiles for image {}".format(image.instanceFilename))
             sldc_image = CytomineProjectionSlide(image, projection)
             tile_builder = CytomineProjectionTileBuilder("/tmp")
-            topology = sldc_image.tile_topology(tile_builder, tile_size, tile_size, 5)
+            topology = sldc_image.tile_topology(tile_builder, tile_size, tile_size, tile_overlap)
 
             results = generic_parallel(topology, worker_tile_func)
             thresholds = list()
