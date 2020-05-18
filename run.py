@@ -19,7 +19,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
 import numpy as np
 from cytomine import CytomineJob
 from cytomine.models import ImageInstanceCollection, AnnotationCollection, Annotation
@@ -27,12 +26,12 @@ from cytomine.models._utilities.parallel import generic_parallel
 from shapely.affinity import affine_transform
 from skimage import img_as_uint
 from skimage.filters import *
-from PIL import Image
+from sldc import SemanticMerger
+from mask_to_polygons import mask_to_objects_2d
+from sldc_adapter import CytomineProjectionSlide, CytomineProjectionTileBuilder
 
 __author__ = "Rubens Ulysse <urubens@uliege.be>"
 __copyright__ = "Copyright 2010-2020 University of Liège, Belgium, https://uliege.cytomine.org/"
-
-from mask_to_polygons import mask_to_objects_2d
 
 
 def change_referential(p, height):
@@ -50,15 +49,6 @@ def _get_filter(name):
         return threshold_yen
     else:
         raise ValueError("Filter {} is not found".format(name))
-
-
-def _get_window_from_tile(tile, image, tile_size):
-    tile_x, tile_y = tile
-    x = tile_x * tile_size
-    y = tile_y * tile_size
-    width = min(tile_size, image.width - x)
-    height = min(tile_size, image.height - y)
-    return x, y, width, height
 
 
 def main(argv):
@@ -83,49 +73,48 @@ def main(argv):
         cj.log("Projection: {}".format(projection))
         for image in cj.monitor(images, prefix="Running detection on image", start=5, end=99):
             def worker_tile_func(tile):
-                x, y, width, height = _get_window_from_tile(tile, image, tile_size)
-                dest = os.path.join("/tmp", "{}-{}-{}.png".format(image.id, tile[0], tile[1]))
-                image.window(x, y, width, height, dest_pattern=dest, projection=projection, override=False)
-                window = np.asarray(Image.open(dest))
+                window = tile.np_image
                 threshold = filter_func(window)
                 return window, threshold
 
             cj.log("Get tiles for image {}".format(image.instanceFilename))
-            tiles = []
-            x_tiles = int(np.ceil(image.width / tile_size))
-            y_tiles = int(np.ceil(image.height / tile_size))
-            for x in range(x_tiles):
-                for y in range(y_tiles):
-                    tiles.append((x, y))
+            sldc_image = CytomineProjectionSlide(image, projection)
+            tile_builder = CytomineProjectionTileBuilder("/tmp")
+            topology = sldc_image.tile_topology(tile_builder, tile_size, tile_size, 5)
 
-            results = generic_parallel(tiles, worker_tile_func)
-            data = []
+            results = generic_parallel(topology, worker_tile_func)
+            thresholds = list()
             for result in results:
                 tile, output = result
                 window, threshold = output
-                data.append((tile, window, threshold))
+                thresholds.append(threshold)
 
-            thresholds = [t for _, _, t in data]
-            mean_threshold = int(np.mean(thresholds))
-            cj.log("Mean threshold is {}".format(mean_threshold))
+            global_threshold = int(np.mean(thresholds))
+            cj.log("Mean threshold is {}".format(global_threshold))
 
-            def worker_annotations_func(data):
-                tile, window, threshold = data
-                if use_global_threshold:
-                    threshold = mean_threshold
-                x, y, _, _ = _get_window_from_tile(tile, image, tile_size)
-                filtered = img_as_uint(window > threshold)
-                geometries = mask_to_objects_2d(filtered, offset=(x, y))
-                ac = AnnotationCollection()
-                for geometry in geometries:
-                    if geometry.area > cj.parameters.min_area:
-                        ac.append(Annotation(location=change_referential(geometry, image.height).wkt,
-                                             id_image=image.id, id_terms=term_ids))
+            def worker_annotations_func(tile):
+                filtered = img_as_uint(tile.np_image > global_threshold)
+                return mask_to_objects_2d(filtered, offset=tile.abs_offset)
 
-                ac.save()
+            cj.log("Extract annotations from filtered tiles for image {}".format(image.instanceFilename))
+            results = generic_parallel(topology, worker_annotations_func)
+            ids, geometries = list(), list()
+            for result in results:
+                tile, tile_geometries = result
+                # Workaround for slow SemanticMerger but geometries shouldn't be filtered at this stage.
+                tile_geometries = [g for g in tile_geometries if g.area > cj.parameters.min_area]
+                ids.append(tile.identifier)
+                geometries.append(tile_geometries)
 
-            cj.log("Extract annotations from filtered image {}".format(image.instanceFilename))
-            results = generic_parallel(data, worker_annotations_func)
+            cj.log("Merge annotations from filtered tiles for image {}".format(image.instanceFilename))
+            merged_geometries = SemanticMerger(tolerance=1).merge(ids, geometries, topology)
+            cj.log("{} merged geometries".format(len(merged_geometries)))
+            ac = AnnotationCollection()
+            for geometry in merged_geometries:
+                if geometry.area > cj.parameters.min_area:
+                    ac.append(Annotation(location=change_referential(geometry, image.height).wkt,
+                                         id_image=image.id, id_terms=term_ids))
+            ac.save()
 
         cj.job.update(statusComment="Finished.", progress=100)
 

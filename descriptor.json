@@ -105,6 +105,16 @@
 	    "default-value": "1024",
 	    "type": "Number"
 	},
+    {
+	    "id": "tile_overlap",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Tile overlap",
+	    "description": "Overlap between tiles",
+	    "optional": false,
+	    "default-value": "32",
+	    "type": "Number"
+	},
 	{
 	    "id": "min_area",
 	    "value-key": "[@ID]",
@@ -121,7 +131,7 @@
 	    "command-line-flag": "--@id",
 	    "name": "Maximum object area",
 	    "description": "Maximum area of objects in pixels",
-	    "optional": false,
+	    "optional": true,
 	    "default-value": "10000000",
 	    "type": "Number"
 	},
@@ -131,7 +141,7 @@
 	    "command-line-flag": "--@id",
 	    "name": "Union minimum length",
 	    "description": "Minimum length for union, in pixels",
-	    "optional": false,
+	    "optional": true,
 	    "default-value": "10",
 	    "type": "Number"
 	},
@@ -141,7 +151,7 @@
 	    "command-line-flag": "--@id",
 	    "name": "Union Buffer Overlap",
 	    "description": "Buffer overlap for union, in pixels",
-	    "optional": false,
+	    "optional": true,
 	    "default-value": "5",
 	    "type": "Number"
 	}
