@@ -1,0 +1,151 @@
+{
+    "name": "Segment-CV-Objection-Projection",
+    "description": "Detects objects in a big image using thresholding on a 3D image projection",
+    "container-image": {
+	"image": "cytomineuliege/s_segment-cv-threshold-objection-projection",
+	"type": "singularity"
+    },
+    "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_PREDICTED_TERM] [PROJECTION] [FILTER] [TILE_SIZE] [MIN_AREA] [MAX_AREA] [UNION_MIN_LENGTH] [UNION_BUFFER_OVERLAP]",
+    "inputs": [
+	{
+	    "id": "cytomine_host",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Cytomine host",
+	    "set-by-server": true,
+	    "optional": false,
+	    "type": "String"
+	},
+	{
+	    "id": "cytomine_public_key",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Cytomine public key",
+	    "set-by-server": true,
+	    "optional": false,
+	    "type": "String"
+	},
+	{
+	    "id": "cytomine_private_key",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Cytomine private key",
+	    "set-by-server": true,
+	    "optional": false,
+	    "type": "String"
+	},
+	{
+	    "id": "cytomine_id_project",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Cytomine project ID",
+	    "set-by-server": true,
+	    "optional": false,
+	    "type": "Number"
+	},
+	{
+	    "id": "cytomine_id_software",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Cytomine software ID",
+	    "set-by-server": true,
+	    "optional": false,
+	    "type": "Number"
+	},
+	{
+	    "id": "cytomine_id_predicted_term",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Term to predict",
+	    "description": "The term that will be associated to detected objects",
+	    "optional": true,
+	    "type": "Domain",
+	    "uri": "/api/ontology/$currentOntology$/term.json",
+	    "uri-print-attribute": "name",
+	    "uri-sort-attribute": "name"
+	},
+	{
+	    "id": "cytomine_id_images",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Images to process",
+	    "optional": false,
+	    "type": "ListDomain",
+	    "uri": "/api/project/$currentProject$/imageinstance.json",
+	    "uri-print-attribute": "instanceFilename",
+	    "uri-sort-attribute": "instanceFilename"
+	},
+	{
+	    "id": "projection",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Projection",
+	    "description": "3D image projection used to detect objects (possible value: 'min', 'max', 'average')",
+	    "optional": false,
+	    "default-value": "max",
+	    "type": "String"
+	},
+	{
+	    "id": "filter",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Thresholding filter",
+	    "description": "Filter ('isodata','li','otsu','yen') to detect foreground objects",
+	    "optional": false,
+	    "default-value": "otsu",
+	    "type": "String"
+	},
+	{
+	    "id": "tile_size",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Tile size",
+	    "description": "Tile size where threshold is applied",
+	    "optional": false,
+	    "default-value": "1024",
+	    "type": "Number"
+	},
+	{
+	    "id": "min_area",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Minimum Object Area",
+	    "description": "Minimum area of objects in pixels",
+	    "optional": false,
+	    "default-value": "100",
+	    "type": "Number"
+	},
+	{
+	    "id": "max_area",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Maximum object area",
+	    "description": "Maximum area of objects in pixels",
+	    "optional": false,
+	    "default-value": "10000000",
+	    "type": "Number"
+	},
+	{
+	    "id": "union_min_length",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Union minimum length",
+	    "description": "Minimum length for union, in pixels",
+	    "optional": false,
+	    "default-value": "10",
+	    "type": "Number"
+	},
+	{
+	    "id": "union_buffer_overlap",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Union Buffer Overlap",
+	    "description": "Buffer overlap for union, in pixels",
+	    "optional": false,
+	    "default-value": "5",
+	    "type": "Number"
+	}
+    ],
+
+    "schema-version": "cytomine-0.1"
+}
