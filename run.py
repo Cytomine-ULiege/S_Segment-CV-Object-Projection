@@ -56,7 +56,7 @@ def main(argv):
         cj.job.update(progress=1, statusComment="Initialisation")
         cj.log(str(cj.parameters))
 
-        term_ids = [cj.parameters.cytomine_id_term] if hasattr(cj.parameters, "cytomine_id_term") else None
+        term_ids = [cj.parameters.cytomine_id_term] if hasattr(cj.parameters, "cytomine_id_predicted_term") else None
 
         image_ids = [int(image_id) for image_id in cj.parameters.cytomine_id_images.split(",")]
         images = ImageInstanceCollection().fetch_with_filter("project", cj.parameters.cytomine_id_project)
