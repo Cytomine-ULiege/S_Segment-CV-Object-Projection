@@ -124,36 +124,6 @@
 	    "optional": false,
 	    "default-value": "100",
 	    "type": "Number"
-	},
-	{
-	    "id": "max_area",
-	    "value-key": "[@ID]",
-	    "command-line-flag": "--@id",
-	    "name": "Maximum object area",
-	    "description": "Maximum area of objects in pixels",
-	    "optional": true,
-	    "default-value": "10000000",
-	    "type": "Number"
-	},
-	{
-	    "id": "union_min_length",
-	    "value-key": "[@ID]",
-	    "command-line-flag": "--@id",
-	    "name": "Union minimum length",
-	    "description": "Minimum length for union, in pixels",
-	    "optional": true,
-	    "default-value": "10",
-	    "type": "Number"
-	},
-	{
-	    "id": "union_buffer_overlap",
-	    "value-key": "[@ID]",
-	    "command-line-flag": "--@id",
-	    "name": "Union Buffer Overlap",
-	    "description": "Buffer overlap for union, in pixels",
-	    "optional": true,
-	    "default-value": "5",
-	    "type": "Number"
 	}
     ],
 
