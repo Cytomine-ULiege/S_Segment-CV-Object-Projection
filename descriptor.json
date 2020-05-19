@@ -124,8 +124,18 @@
 	    "optional": false,
 	    "default-value": "100",
 	    "type": "Number"
+	},
+		{
+	    "id": "annotation_slices",
+	    "value-key": "[@ID]",
+	    "command-line-flag": "--@id",
+	    "name": "Slices to use for annotations",
+	    "description": "The slice(s) where annotations are added ('first', 'median', 'all')",
+	    "optional": false,
+	    "default-value": "median",
+	    "type": "String"
 	}
-    ],
+	],
 
     "schema-version": "cytomine-0.1"
 }

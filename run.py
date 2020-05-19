@@ -21,7 +21,7 @@ from __future__ import unicode_literals
 
 import numpy as np
 from cytomine import CytomineJob
-from cytomine.models import ImageInstanceCollection, AnnotationCollection, Annotation
+from cytomine.models import ImageInstanceCollection, AnnotationCollection, Annotation, SliceInstanceCollection
 from cytomine.models._utilities.parallel import generic_parallel
 from shapely.affinity import affine_transform
 from skimage import img_as_uint
@@ -56,7 +56,8 @@ def main(argv):
         cj.job.update(progress=1, statusComment="Initialisation")
         cj.log(str(cj.parameters))
 
-        term_ids = [cj.parameters.cytomine_id_term] if hasattr(cj.parameters, "cytomine_id_predicted_term") else None
+        term_ids = [cj.parameters.cytomine_id_predicted_term] \
+            if hasattr(cj.parameters, "cytomine_id_predicted_term") else None
 
         image_ids = [int(image_id) for image_id in cj.parameters.cytomine_id_images.split(",")]
         images = ImageInstanceCollection().fetch_with_filter("project", cj.parameters.cytomine_id_project)
@@ -109,11 +110,23 @@ def main(argv):
             cj.log("Merge annotations from filtered tiles for image {}".format(image.instanceFilename))
             merged_geometries = SemanticMerger(tolerance=1).merge(ids, geometries, topology)
             cj.log("{} merged geometries".format(len(merged_geometries)))
+
+            if cj.parameters.annotation_slices == 'median':
+                # By default, if no slice is given, an annotation is added to the median slice
+                slice_ids = [None]
+            else:
+                slices = SliceInstanceCollection().fetch_with_filter("imageinstance", image.id)
+                if cj.parameters.annotation_slices == 'first':
+                    slice_ids = [slices[0].id]
+                else:
+                    slice_ids = [sl.id for sl in slices]
+
             ac = AnnotationCollection()
             for geometry in merged_geometries:
                 if geometry.area > cj.parameters.min_area:
-                    ac.append(Annotation(location=change_referential(geometry, image.height).wkt,
-                                         id_image=image.id, id_terms=term_ids))
+                    for slice_id in slice_ids:
+                        ac.append(Annotation(location=change_referential(geometry, image.height).wkt,
+                                             id_image=image.id, id_terms=term_ids, id_slice=slice_id))
             ac.save()
 
         cj.job.update(statusComment="Finished.", progress=100)
