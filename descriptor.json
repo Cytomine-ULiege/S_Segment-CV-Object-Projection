@@ -1,11 +1,11 @@
 {
-    "name": "Segment-CV-Objection-Projection",
+    "name": "Segment-CV-Object-Projection",
     "description": "Detects objects in a big image using thresholding on a 3D image projection",
     "container-image": {
-	"image": "cytomineuliege/s_segment-cv-threshold-objection-projection",
+	"image": "cytomineuliege/s_segment-cv-object-projection",
 	"type": "singularity"
     },
-    "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_PREDICTED_TERM] [PROJECTION] [FILTER] [TILE_SIZE] [MIN_AREA] [MAX_AREA] [UNION_MIN_LENGTH] [UNION_BUFFER_OVERLAP]",
+    "command-line": "[CYTOMINE_HOST] [CYTOMINE_PUBLIC_KEY] [CYTOMINE_PRIVATE_KEY] [CYTOMINE_ID_PROJECT] [CYTOMINE_ID_IMAGES] [CYTOMINE_ID_SOFTWARE] [CYTOMINE_ID_PREDICTED_TERM] [PROJECTION] [FILTER] [TILE_SIZE] [TILE_OVERLAP] [MIN_AREA] [ANNOTATION_SLICES]",
     "inputs": [
 	{
 	    "id": "cytomine_host",
